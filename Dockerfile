@@ -1,11 +1,12 @@
-FROM janeczku/alpine-kubernetes:3.2
+FROM janeczku/alpine-kubernetes:3.3
 
-RUN apk --update add rsyslog bash openjdk7 make wget
+RUN echo "@testing http://dl-cdn.alpinelinux.org/alpine/edge/testing" >> /etc/apk/repositories
+RUN apk --update add rsyslog bash openjdk7 make wget gnuplot@testing
 
 RUN apk --update add --virtual builddeps build-base autoconf automake git python
 
 ENV TSDB_VERSION 2.2.0
-ENV HBASE_VERSION 1.1.3
+ENV HBASE_VERSION 1.1.4
 ENV JAVA_HOME /usr/lib/jvm/java-1.7-openjdk
 ENV PATH $PATH:/usr/lib/jvm/java-1.7-openjdk/bin/
 
@@ -28,7 +29,7 @@ RUN mkdir -p /data/hbase
 RUN mkdir -p /root/.profile.d
 RUN mkdir -p /opt/downloads
 WORKDIR /opt/downloads
-RUN wget -O hbase-${HBASE_VERSION}.bin.tar.gz http://www-us.apache.org/dist/hbase/1.1.3/hbase-1.1.3-bin.tar.gz && \
+RUN wget -O hbase-${HBASE_VERSION}.bin.tar.gz http://www-us.apache.org/dist/hbase/${HBASE_VERSION}/hbase-${HBASE_VERSION}-bin.tar.gz && \
     tar xzvf hbase-${HBASE_VERSION}.bin.tar.gz && \
     mv hbase-${HBASE_VERSION} /opt/hbase && \
     rm hbase-${HBASE_VERSION}.bin.tar.gz
@@ -52,3 +53,5 @@ RUN ln -s /opt/bin/start_opentsdb.sh /etc/services.d/tsdb/run
 EXPOSE 60000 60010 60030 4242 16010
 
 VOLUME ["/data/hbase"]
+
+ENTRYPOINT ["/init"]
